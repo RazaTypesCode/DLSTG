@@ -11,8 +11,6 @@ rows.append(("(a) max|M(M(x)) - x|", (M(M(x)) - x).abs().max().item(), 0, torch.
 rows.append(("(b) max|R^4(x) - x|", (R(R(R(R(x)))) - x).abs().max().item(), 0, torch.equal(R(R(R(R(x)))), x)))
 lhs, rhs = M(R(M(x))), R(x, -1)
 rows.append(("(c) max|MRM(x) - R^-1(x)|", (lhs - rhs).abs().max().item(), 0, torch.equal(lhs, rhs)))
-for name, row in rows:
-    pass
 for name, val, exp, eq in rows:
     print(f"{name:32s} expected {exp}  yours {val}  torch.equal={eq}")
 

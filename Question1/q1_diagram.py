@@ -1,4 +1,8 @@
-"""Draws the Q1 architecture diagram -> figures/q1_architecture.png  (python q1_diagram.py)"""
+"""Draws the Q1 architecture diagram -> figures/q1_architecture.png  (python q1_diagram.py)
+
+Layout: data sources -> as-of snapshot -> node encoders -> river graph (lag attention) -> fuse -> decoder -> output.
+The announced future releases F reach the decoder along a separate dashed route (known-future path).
+"""
 import os
 
 import matplotlib
@@ -7,74 +11,95 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
 os.makedirs("figures", exist_ok=True)
-fig, ax = plt.subplots(figsize=(13, 7.2))
-ax.set_xlim(0, 13); ax.set_ylim(0, 7.2); ax.axis("off")
+fig, ax = plt.subplots(figsize=(15, 7.6))
+ax.set_xlim(0, 15); ax.set_ylim(0, 7.6); ax.axis("off")
 
-C = dict(inp="#e8eef7", proc="#dff0ea", graph="#fdf1dc", out="#f9e3e3", note="#f2f2f2")
+COL = dict(inp="#e8eef7", proc="#dff0ea", graph="#fdf1dc", out="#f9e3e3", panel="#fffaf0")
+EDGE = "#33415c"
 
 
 def box(x, y, w, h, text, color, fs=8, bold=False):
     ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.08",
-                                fc=color, ec="#33415c", lw=1))
+                                fc=color, ec=EDGE, lw=1))
     ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fs,
-            fontweight="bold" if bold else "normal")
+            fontweight="bold" if bold else "normal", linespacing=1.35)
 
 
-def arrow(x0, y0, x1, y1, label=None, color="#33415c", ls="-"):
-    ax.annotate("", xy=(x1, y1), xytext=(x0, y0),
-                arrowprops=dict(arrowstyle="->", color=color, lw=1.2, linestyle=ls))
+def arrow(p0, p1, label=None, color=EDGE, ls="-", shrink=0, lw=1.3):
+    ax.annotate("", xy=p1, xytext=p0,
+                arrowprops=dict(arrowstyle="->", color=color, lw=lw, linestyle=ls,
+                                shrinkA=shrink, shrinkB=shrink))
     if label:
-        ax.text((x0 + x1) / 2, (y0 + y1) / 2 + 0.12, label, fontsize=6.5, ha="center", color=color)
+        ax.text((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 + 0.12, label, fontsize=7,
+                ha="center", color=color)
 
 
-# ---- column 1: data sources (what is known at issuance time t)
-ax.text(1.25, 7.0, "Data available at issuance t", ha="center", fontsize=9, fontweight="bold")
-src = [
-    ("Water levels S1–S4, T1\nW: [B, L, 5]  (10-min, ≤ t)", 5.85),
-    ("Rain gauges R1, R2\nP: [B, L, 2]  (10-min sums, ≤ t)", 4.75),
-    ("Actual reservoir release\nU: [B, L, 1]  (≤ t)", 3.65),
-    ("Announced release schedule\nF: [B, H=6, d_f]  (announced ≤ t,\neffective t+10 … t+60 min)", 2.45),
-    ("Static river data G\nlocations, order, distances\nadjacency [4, d_s]", 1.2),
+# ---------------------------------------------------------------- column titles
+for x, t in ((1.4, "Data known at issuance t"), (4.25, "Alignment"), (6.9, "Encoding"),
+             (10.25, "River graph"), (13.8, "Forecast")):
+    ax.text(x, 7.3, t, ha="center", fontsize=10, fontweight="bold")
+
+# ---------------------------------------------------------------- 1. data sources
+inputs = [
+    ("Water levels S1–S4, T1\nW: [B, L, 5]   (≤ t)", 6.0),
+    ("Rain gauges R1, R2\nP: [B, L, 2]   (≤ t)", 4.9),
+    ("Actual reservoir release\nU: [B, L, 1]   (≤ t)", 3.8),
+    ("Announced release schedule\nF: [B, 6, d_f]   (announced ≤ t)", 2.7),
+    ("Static river data G\nlocations, distances, adjacency", 1.6),
 ]
-for text, y in src:
-    box(0.1, y, 2.3, 0.85 if "Announced" not in text else 1.05, text, C["inp"], fs=7)
-ax.text(1.25, 0.55, "Not available at t: future rain,\nfuture levels (targets only in training)", ha="center",
-        fontsize=7, style="italic", color="#8a1c1c")
+for text, y in inputs:
+    box(0.1, y, 2.6, 0.9, text, COL["inp"], fs=8)
+ax.text(1.4, 0.95, "Not available at t: future rain, future levels\n(targets appear only in training)", ha="center",
+        fontsize=7.5, style="italic", color="#8a1c1c")
 
-# ---- column 2: as-of alignment
-box(3.0, 1.2, 1.9, 4.9, "As-of-t snapshot\n\n• keep records with\n  arrival time ≤ t\n• event-time → 10-min grid\n• mask M ∈ {0,1}\n• age a (min since\n  last valid value)\n• anchor w_i(t) =\n  latest valid level\n\n→ x: [B, L, 6 nodes, d_x]\n(R0, S1, S2, S3, S4, T1)",
-    C["proc"], fs=7.5)
-for _, y in src[:3]:
-    arrow(2.4, y + 0.4, 3.0, 3.65)
-arrow(2.4, 3.0, 3.0, 3.0); arrow(2.4, 1.6, 3.0, 2.0)
+# ---------------------------------------------------------------- 2. as-of snapshot
+box(3.3, 1.2, 1.9, 5.7,
+    "As-of-t snapshot\n\n• records with arrival ≤ t\n• event time → 10-min grid\n• mask M, age a\n• anchor w_i(t) =\n  latest valid level\n\nx: [B, L, 6 nodes, d_x]\nnodes: R0, S1–S4, T1",
+    COL["proc"], fs=8)
+for _, y in inputs:
+    arrow((2.7, y + 0.45), (3.3, y + 0.45))
 
-# ---- column 3: temporal encoders
-box(5.4, 2.6, 1.9, 2.0, "Per-node temporal\nencoder (GRU, shared\nweights + station\nembedding e_i)\n\nh_{i,s}: [B, L, 6, d=32]\nh_i = h_{i,t}", C["proc"], fs=7.5)
-arrow(4.9, 3.65, 5.4, 3.65, "x")
+# ---------------------------------------------------------------- 3. temporal encoder
+box(5.9, 3.0, 2.0, 1.6, "Per-node temporal\nencoder (shared GRU\n+ node embedding e_i)\n\nh_{i,s}: [B, L, 6, 32]", COL["proc"], fs=8)
+arrow((5.2, 3.8), (5.9, 3.8))
 
-# ---- column 4: river graph
-ax.text(9.0, 6.55, "Directed river graph (downstream flow)", ha="center", fontsize=9, fontweight="bold")
-pos = {"R0": (7.9, 5.5), "S1": (8.7, 4.6), "S2": (9.5, 3.7), "S3": (10.3, 2.8), "S4": (11.1, 1.9),
-       "T1": (8.0, 3.0), "Q": (10.4, 4.3)}
+# ---------------------------------------------------------------- 4. river graph panel
+ax.add_patch(FancyBboxPatch((8.4, 2.0), 3.9, 4.7, boxstyle="round,pad=0.02,rounding_size=0.1",
+                            fc=COL["panel"], ec=EDGE, lw=1, ls="--"))
+ax.text(10.35, 6.45, "lag attention along directed edges", ha="center", fontsize=8, style="italic")
+arrow((7.9, 3.8), (8.4, 3.8), "h")
+pos = {"R0": (9.0, 5.7), "S1": (9.7, 4.95), "S2": (10.4, 4.2), "S3": (11.1, 3.45), "S4": (11.8, 2.7),
+       "T1": (9.0, 3.4), "latent": (11.2, 5.4)}
 for n, (x, y) in pos.items():
-    fc = "#fbe9a8" if n in ("S1", "S2", "S3", "S4") else ("#d9d9d9" if n != "Q" else "#f4c7c3")
-    ax.add_patch(plt.Circle((x, y), 0.28, fc=fc, ec="#33415c"))
-    ax.text(x, y, n if n != "Q" else "latent", ha="center", va="center", fontsize=7 if n != "Q" else 5.5)
+    fc = "#fbe9a8" if n in ("S1", "S2", "S3", "S4") else ("#f4c7c3" if n == "latent" else "#d9d9d9")
+    ax.add_patch(plt.Circle((x, y), 0.27, fc=fc, ec=EDGE, zorder=3))
+    ax.text(x, y, n, ha="center", va="center", fontsize=7 if n != "latent" else 5.5, zorder=4)
 for a, b in (("R0", "S1"), ("S1", "S2"), ("S2", "S3"), ("S3", "S4"), ("T1", "S2")):
-    arrow(pos[a][0] + 0.2, pos[a][1] - 0.2, pos[b][0] - 0.2, pos[b][1] + 0.2)
-arrow(pos["Q"][0] - 0.15, pos["Q"][1] - 0.25, pos["S3"][0] + 0.05, pos["S3"][1] + 0.3, color="#b03a2e", ls="--")
-ax.text(11.45, 4.35, "unmonitored\ntributary:\nlatent inflow\nu_3 (not\nobserved)", fontsize=6.5, color="#b03a2e")
-box(7.5, 0.45, 3.3, 0.95, "Message m_i = Σ_j Σ_λ α_ji(λ) W[h_{j,t−λ}; ψ_ji]\nlag window λ ∈ [λ_min, λ_max] from distance / celerity range\nα adapts to current flow ⇒ time-varying travel time", C["graph"], fs=6.8)
-arrow(7.3, 3.6, 7.6, 2.5)
-arrow(7.3, 3.9, 7.7, 4.9, "h_j,s")
-box(11.3, 0.45, 1.55, 0.95, "fuse: z_i =\nFuse(h_i, m_i,\nrain r_i, release)", C["graph"], fs=6.8)
-arrow(10.8, 0.9, 11.3, 0.9)
+    arrow(pos[a], pos[b], shrink=13)
+arrow(pos["latent"], pos["S3"], color="#b03a2e", ls="--", shrink=13)
+ax.text(11.2, 5.95, "unmonitored tributary:\nlatent inflow only", ha="center", fontsize=6.5, color="#b03a2e")
 
-# ---- output
-box(11.5, 5.0, 1.4, 1.5, "Decoder\nŷ_{i,h}^q = w_i(t) + σ_i·δ(z_i, F_h, e_i, h)\nq ∈ {0.1, 0.5, 0.9}", C["out"], fs=6.3)
-arrow(12.05, 1.4, 12.05, 5.0, "z_i")
-arrow(2.4, 3.0, 11.5, 5.55, "scheduled releases F (known future)", color="#2e6f9e", ls="--")
-box(11.5, 6.65, 1.4, 0.45, "Ŷ: [B, 6, 4, 3]  S1–S4", C["out"], fs=7, bold=True)
-arrow(12.2, 6.5, 12.2, 6.65)
+box(8.4, 0.75, 3.9, 0.95,
+    r"$m_i=\sum_{j}\sum_{\lambda}\alpha_{ji}(\lambda)\,W[h_{j,t-\lambda};\psi_{ji}]$" "\n"
+    "λ ∈ [λmin, λmax] from distance / celerity range;\nα adapts to the current flow state",
+    COL["graph"], fs=7.5)
+
+# ---------------------------------------------------------------- 5. fuse -> decoder -> output
+box(12.8, 1.2, 2.0, 1.4, "Fuse\n" r"$z_i=\mathrm{Fuse}(h_i,m_i,r_i,e_i)$", COL["graph"], fs=8)
+box(12.8, 3.4, 2.0, 1.8, "Decoder\n" r"$\hat y^{\,q}_{i,h}=w_i(t)+\sigma_i\,\delta^{q}$" "\n"
+    r"$\delta^{q}=f(z_i,\,F,\,e_i,\,h)$" "\nq ∈ {0.1, 0.5, 0.9}", COL["out"], fs=8)
+box(12.8, 5.9, 2.0, 0.9, "Output  Ŷ\n[B, 6, 4, 3]   S1–S4", COL["out"], fs=8, bold=True)
+arrow((12.3, 1.9), (12.8, 1.9))                 # graph -> fuse
+arrow((13.8, 2.6), (13.8, 3.4), "z")            # fuse -> decoder
+arrow((13.8, 5.2), (13.8, 5.9))                 # decoder -> output
+
+# ---------------------------------------------------------------- known-future path for announced schedule F
+blue = "#2e6f9e"
+ax.plot([1.4, 1.4], [2.7, 0.45], color=blue, ls="--", lw=1.3)
+ax.plot([1.4, 12.5], [0.45, 0.45], color=blue, ls="--", lw=1.3)
+ax.plot([12.5, 12.5], [0.45, 4.3], color=blue, ls="--", lw=1.3)
+arrow((12.5, 4.3), (12.8, 4.3), color=blue, ls="--")
+ax.text(6.2, 0.55, "announced future releases F (known at t) go straight to the decoder", fontsize=7.5, color=blue, ha="center")
+
 plt.savefig("figures/q1_architecture.png", dpi=220, bbox_inches="tight")
 print("saved figures/q1_architecture.png")

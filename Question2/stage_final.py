@@ -32,7 +32,7 @@ def gather(name, sym):
     out = []
     for s in (0, 1):
         m = c.load_model(name, s, device)
-        f = c.sym_forecaster(ev.model_fn(m)) if sym else ev.model_fn(m)
+        f = c.sym_forecaster(c.model_fn(m)) if sym else c.model_fn(m)
         tag = f"{'sym_' if sym else ''}{name}_seed{s}"
         d = dict(ev.cached_metrics(tag, f, test, device))
         log = json.load(open(os.path.join(c.run_dir(name, s), "log.json")))
@@ -67,7 +67,7 @@ print("Table 6 (train time = underlying learned model only; inference includes 8
 open("results/table6.md", "w").write(t6 + "\n")
 
 # ---------------- Figure 6 with the final model (seed 0) on exactly the Figure 3 / Figure 5 videos
-final = c.sym_forecaster(ev.model_fn(c.load_model(args.final, 0, device)))
+final = c.sym_forecaster(c.model_fn(c.load_model(args.final, 0, device)))
 sel = json.load(open("results/selection.json"))
 Ts = {"M": c.M, "R": c.R}
 with torch.no_grad():

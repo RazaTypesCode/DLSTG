@@ -18,8 +18,11 @@ Question2/**/ckpt.pt.tmp
 Question2/**/model.pt
 
 # Course material that should not be public (handout, study guides, PA1 report).
-# The final report PDF goes in report/ and is allowed.
 /*.pdf
+*.zip
+
+# The report is compiled in Overleaf and is not part of the repo (same as PA1)
+report/
 
 # LaTeX build files
 *.aux
