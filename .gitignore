@@ -1,0 +1,31 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+
+# Python / notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Question 2 heavy artifacts (live on Google Drive, not in git)
+Question2/data/
+Question2/runs/
+Question2/**/ckpt.pt
+Question2/**/ckpt.pt.tmp
+Question2/**/model.pt
+
+# Course material that should not be public (handout, study guides, PA1 report).
+# The final report PDF goes in report/ and is allowed.
+/*.pdf
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
