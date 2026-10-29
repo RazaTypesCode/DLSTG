@@ -1,0 +1,38 @@
+{
+ "fig2": [
+  0,
+  6,
+  7
+ ],
+ "fig3": [
+  {
+   "T": "M",
+   "rank": 1,
+   "test_index": 269,
+   "png": "figures/fig3_M_rank1_video9269.png",
+   "gif": "figures/gifs/fig3_M_rank1_video9269.gif"
+  },
+  {
+   "T": "M",
+   "rank": 2,
+   "test_index": 499,
+   "png": "figures/fig3_M_rank2_video9499.png",
+   "gif": "figures/gifs/fig3_M_rank2_video9499.gif"
+  },
+  {
+   "T": "R",
+   "rank": 1,
+   "test_index": 31,
+   "png": "figures/fig3_R_rank1_video9031.png",
+   "gif": "figures/gifs/fig3_R_rank1_video9031.gif"
+  },
+  {
+   "T": "R",
+   "rank": 2,
+   "test_index": 150,
+   "png": "figures/fig3_R_rank2_video9150.png",
+   "gif": "figures/gifs/fig3_R_rank2_video9150.gif"
+  }
+ ],
+ "fig5": 21
+}
