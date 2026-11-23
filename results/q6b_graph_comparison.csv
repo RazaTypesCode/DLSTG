@@ -1,0 +1,12 @@
+,STGNN Adaptive,STGNN Hybrid
+mean Precision@10,0.03733705772811918,0.03134698944754811
+mean Jaccard@10,0.009777236712267079,0.007185883624665071
+learned edges that are road edges,0.03731656184486373,0.03131991051454139
+learned edges within 2 road hops,0.10090845562543675,0.09368008948545861
+mean learned self-weight (top-k matrix diagonal),0.0008609718061052263,6.890609802212566e-05
+max in-degree of learned graph,85.0,120.0
+sensors that are nobody's learned neighbour,329.0,429.0
+mean distance learned edges (km),26.317581465623032,27.1668457065302
+median distance learned edges (km),22.332155099382227,22.99007584114647
+mean distance road edges (km),2.279601848984577,2.279601848984577
+mean distance random pairs (km),27.160847199002617,27.160847199002617

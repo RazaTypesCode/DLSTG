@@ -1,0 +1,10 @@
+task,method,possible,reason
+(i) count steady,Sum,Yes,rho: read v_0 (= n_0)
+(i) count steady,Mean,No,"{0} and {0,0} both give (0, 1, 0); answers 1 vs 2"
+(i) count steady,Max,No,"{0} and {0,0} both give (0, 1, 0); answers 1 vs 2"
+(ii) more than half slowing,Sum,Yes,rho: v_- > (v_- + v_0 + v_+)/2
+(ii) more than half slowing,Mean,Yes,rho: v_- > 1/2
+(ii) more than half slowing,Max,No,"{-1,+1} and {-1,-1,+1} both give (1, 0, 1); answers False vs True"
+(iii) any slowing,Sum,Yes,rho: v_- > 0
+(iii) any slowing,Mean,Yes,rho: v_- > 0
+(iii) any slowing,Max,Yes,rho: v_- == 1

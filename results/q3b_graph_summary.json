@@ -1,0 +1,31 @@
+{
+  "nodes": 716,
+  "nonzero entries (incl. diagonal)": 17319,
+  "diagonal nonzero entries": 0,
+  "off-diagonal nonzero entries (directed edges)": 17319,
+  "LargeST paper SD edge count (reference)": 17319,
+  "unique undirected edges (i<j, either direction)": 10515,
+  "symmetric (values, allclose)": false,
+  "symmetric (sparsity pattern)": false,
+  "entries with A_ij != A_ji": 21022,
+  "weight min / max (nonzero, off-diag)": [
+    0.01000183541327715,
+    0.9999998807907104
+  ],
+  "out-degree mean / min / max": [
+    24.18854748603352,
+    0,
+    70
+  ],
+  "in-degree mean / min / max": [
+    24.18854748603352,
+    0,
+    68
+  ],
+  "undirected degree mean / min / max": [
+    29.37150837988827,
+    0,
+    72
+  ],
+  "isolated sensors (no edge either way)": 3
+}

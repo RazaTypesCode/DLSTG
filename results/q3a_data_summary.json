@@ -1,0 +1,46 @@
+{
+  "source": "https://huggingface.co/datasets/TorchSpatiotemporal/ProcessedDatasets/resolve/v1.0.0/large_st/",
+  "years": [
+    2020,
+    2021
+  ],
+  "n_sensors": 716,
+  "aggregation": "sum",
+  "units": "vehicles per 15 min (sum of three 5-min counts)",
+  "per_year": {
+    "2020": {
+      "rows_in_file": 105408,
+      "duplicate_timestamps": 0,
+      "off_grid_rows": 0,
+      "expected_5min_rows": 105408,
+      "missing_timestamps": 0,
+      "missing_5min_values": 3095400,
+      "total_5min_values": 75472128,
+      "zero_5min_values": 213158,
+      "negative_5min_values": 0,
+      "q50_5min": 166.0,
+      "q99_5min": 665.0,
+      "max_5min": 999.0,
+      "missing_15min_values": 1034655,
+      "total_15min_values": 25157376
+    },
+    "2021": {
+      "rows_in_file": 105120,
+      "duplicate_timestamps": 0,
+      "off_grid_rows": 0,
+      "expected_5min_rows": 105120,
+      "missing_timestamps": 0,
+      "missing_5min_values": 4541266,
+      "total_5min_values": 75265920,
+      "zero_5min_values": 188860,
+      "negative_5min_values": 0,
+      "q50_5min": 201.0,
+      "q99_5min": 694.0,
+      "max_5min": 999.0,
+      "missing_15min_values": 1515634,
+      "total_15min_values": 25088640
+    }
+  },
+  "missing_5min_total": 7636666,
+  "missing_15min_total": 2550289
+}

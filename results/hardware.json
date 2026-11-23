@@ -1,0 +1,15 @@
+{
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+  "python": "3.13.16",
+  "torch": "2.14.1+cu130",
+  "numpy": "2.4.6",
+  "pandas": "2.2.3",
+  "h5py": "3.14.0",
+  "cpu_count": 2,
+  "device": "cuda",
+  "colab": true,
+  "cpu_model": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "ram_gb": 12.7,
+  "gpu": "Tesla T4",
+  "gpu_memory_gb": 14.6
+}

@@ -1,0 +1,84 @@
+{
+  "seed": 42,
+  "in_len": 8,
+  "out_len": 4,
+  "hidden": 32,
+  "kernel": 3,
+  "emb_dim": 10,
+  "topk": 10,
+  "alpha": 0.5,
+  "lr": 0.001,
+  "weight_decay": 0.0,
+  "batch_size": 64,
+  "grad_clip": 5.0,
+  "max_epochs": 50,
+  "patience": 5,
+  "loss": "masked MAE on per-sensor z-scored flow",
+  "aggregation": "sum",
+  "smoke_test": false,
+  "device": "cuda",
+  "data": {
+    "source": "https://huggingface.co/datasets/TorchSpatiotemporal/ProcessedDatasets/resolve/v1.0.0/large_st/",
+    "files": [
+      "sensors.zip",
+      "2020/data.h5",
+      "2021/data.h5"
+    ],
+    "licence": "CC BY-NC 4.0",
+    "subset": "district == 11 (San Diego)",
+    "n_sensors": 716,
+    "sensor_order": "metadata row order (sd_meta.csv)",
+    "resampling": "15-min sum of three 5-min counts, all three required"
+  },
+  "splits": {
+    "train": {
+      "first": "2020-01-01 00:00:00",
+      "last": "2020-12-31 23:45:00",
+      "steps": 35136,
+      "windows": 35124
+    },
+    "val": {
+      "first": "2021-01-01 00:00:00",
+      "last": "2021-03-31 23:45:00",
+      "steps": 8640,
+      "windows": 8628
+    },
+    "test": {
+      "first": "2021-04-01 00:00:00",
+      "last": "2021-12-31 23:45:00",
+      "steps": 26400,
+      "windows": 26389
+    },
+    "normalisation": {
+      "kind": "per-sensor z-score, observed 2020 values only",
+      "sensors_without_train_data": 19,
+      "sensors_sd_replaced": 0
+    }
+  },
+  "missing_values": "inputs: sensor training mean (0 after z-score); targets: masked from loss and metrics",
+  "graph_layer": "H = Z + ReLU(A_hat Z W_g + b_g) (residual), head on H; temporal-only: head on Z",
+  "fixed_adjacency": {
+    "diagonal": "cleared, then +I once",
+    "normalisation": "row"
+  },
+  "adaptive_adjacency": "softmax_row(relu(E1 E2^T)) -> top-k per row -> row renormalise -> +I -> row normalise",
+  "hybrid": "alpha * fixed_hat + (1 - alpha) * adaptive_hat, alpha = 0.5 (not learned)",
+  "optimiser": "Adam",
+  "early_stopping": "validation MAE, patience 5, best weights restored",
+  "training_time": "wall-clock of training loop incl. per-epoch validation; excludes data prep and test evaluation",
+  "determinism": "seeded python/numpy/torch, cudnn.deterministic, use_deterministic_algorithms(warn_only=True)",
+  "example_sensors": {
+    "high degree": {
+      "position": 674,
+      "id": "1115921"
+    },
+    "median degree": {
+      "position": 416,
+      "id": "1121771"
+    },
+    "low degree": {
+      "position": 91,
+      "id": "1121715"
+    }
+  }
+}

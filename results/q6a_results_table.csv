@@ -1,0 +1,5 @@
+Model,Adjacency,MAE,RMSE,Training time (s),Val MAE,Val RMSE,Best / run epochs,s per epoch,Parameters
+Temporal-only,None,61.5,96.753,520.9,53.106,86.467,30 / 35,14.9,5444
+STGNN,Fixed,58.102,91.718,578.0,49.436,80.356,30 / 35,16.5,6500
+STGNN,Adaptive,54.073,85.402,748.5,45.495,75.116,38 / 43,17.4,20820
+STGNN,Hybrid,56.247,88.863,697.7,47.224,77.458,35 / 40,17.4,20820
